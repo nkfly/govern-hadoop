@@ -16,21 +16,18 @@ public class SalesCount {
 
       public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
         String line = value.toString();
-        String [] entries = line.split(';');
-        boolean hasOrder = entries[1].valueOf("act=order") == -1 ? false : true;
+        String [] entries = line.split(";");
+        boolean hasOrder = entries[1].indexOf("act=order") == -1 ? false : true;
         if (hasOrder) {
-          String [] plist_entries = entries[3].split("=");
+          //String [] plist_entries = entries[3].split("=");
 
-          String [] plist = plist_entries[1].split(",");
+		String [] plist = entries[3].substring(5).split(",");
 
           for (int i = 0;i < plist.length/3;i++){
             Text word = new Text();
             word.set(plist[3*i]);
             output.collect(word, new IntWritable(-Integer.valueOf(plist[3*i+1])*Integer.valueOf(plist[3*i+2])  ));
           }
-
-          
-
         }
       }
     }
@@ -46,11 +43,11 @@ public class SalesCount {
     }
 
     public static void main(String[] args) throws Exception {
-      JobConf conf = new JobConf(WordCount.class);
+      JobConf conf = new JobConf(SalesCount.class);
       conf.setJobName("salescount");
 
-      conf.setOutputKeyClass(IntWritable.class);
-      conf.setOutputValueClass(Text.class);
+      conf.setOutputKeyClass(Text.class);
+      conf.setOutputValueClass(IntWritable.class);
 
       conf.setMapperClass(Map.class);
       conf.setCombinerClass(Reduce.class);
@@ -65,3 +62,4 @@ public class SalesCount {
       JobClient.runJob(conf);
     }
 }
+

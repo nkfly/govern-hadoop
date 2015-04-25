@@ -1,0 +1,6 @@
+#!/bin/bash
+
+tar -xOf EHC_1st.tar.gz | python preprocess.py
+R CMD BATCH --no-save --no-restore cal_sales.r
+hadoop fs -put EHC_1st_round.log .
+hadoop fs -put r.result
