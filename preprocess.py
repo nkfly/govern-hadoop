@@ -2,11 +2,10 @@ import sys
 
 
 if __name__ == '__main__':
-	with open('EHC_1st_round.log', 'w') as o:
+	with open('EHC_1st_round.log', 'r') as o:
 		with open('preprocess.csv', 'w') as f:
 			f.write('pid,sum\n')
-			for line in sys.stdin:
-				o.write(line)
+			for line in o:
 				if 'act=order' in line:
 					entries = line.split(';')
 					plist_string = entries[3]
