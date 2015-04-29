@@ -13,7 +13,7 @@ int main() {
     content = mmap(0, FILESIZE, PROT_WRITE, MAP_PRIVATE, fd, 0);
 
     FILE *resultfd;
-    resultfd = fopen("preprocess_C.csv", "wb");
+    resultfd = fopen("preprocess_C.csv", "w");
     fprintf(resultfd, "pid,sum\n");
     char *p_1;
     char *p_2;

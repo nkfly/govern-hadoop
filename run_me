@@ -1,7 +1,5 @@
 #!/bin/bash
 
 #time tar -xf EHC_1st.tar.gz
-time ./pigz-2.3.3/pigz -dc ./EHC_1st.tar.gz | tar xf -
-time python preprocess.py && R CMD BATCH --no-save --no-restore cal_sales.r
-time hadoop fs -put EHC_1st_round.log .
+./pigz-2.3.3/pigz -dc /data/EHC_1st.tar.gz | tar xf -  &&  ./preprocess.out &&  R CMD BATCH --no-save --no-restore cal_sales.r  && hadoop fs -mkdir hdfs://master/tmp/Team29 && hadoop fs -copyFromLocal EHC_1st_round.log hdfs://master/tmp/Team29/EHC_1st_round.log
 
