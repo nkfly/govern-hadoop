@@ -10,7 +10,7 @@ int main() {
   content = mmap(0, FILESIZE, PROT_WRITE, MAP_PRIVATE, fd, 0);
 
   FILE *resultfd;
-  resultfd = fopen("preprocess_C.csv", "w");
+  resultfd = fopen("preprocess.csv", "w");
   fprintf(resultfd, "pid,sum\n");
   char line[10000];
   char *check;
