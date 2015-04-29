@@ -2,64 +2,64 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
-int main() {
-  int fd;
-  char *content;
-  static const FILESIZE = 1656885703;
-  fd = open("EHC_1st_round.log", O_RDONLY);
-  content = mmap(0, FILESIZE, PROT_WRITE, MAP_PRIVATE, fd, 0);
+#define _GNU_SOURCE
 
-  FILE *resultfd;
-  resultfd = fopen("preprocess_C.csv", "w");
-  fprintf(resultfd, "pid,sum\n");
-  char line[10000];
-  char *check;
-  char *tok[50];
-  char *pid_tok[50];
-  char *pid_list_tok[500];
-  char *line_ptr = NULL;
-  char *tok_ptr = NULL;
-  char *pid_tok_ptr = NULL;
-  char *pid_list_tok_ptr = NULL;
-  int i, j;
-  int pivot = 0;
-  int count = 0;
-  for (i=0 ; i<FILESIZE ; i++) {
-    line[pivot] = *(content+i);
-    if (line[pivot] == '\n') {
-      line[pivot+1] = '\0';
-      pivot = 0;
-      check = strstr(line, "act=order");
-      if (check == NULL) {
-        continue;
-      } else {
+
+int main() {
+    int fd;
+    void *content;
+    static const int FILESIZE = 1656885703;
+    fd = open("EHC_1st_round.log", O_RDONLY);
+    content = mmap(0, FILESIZE, PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+    FILE *resultfd;
+    resultfd = fopen("preprocess_C.csv", "wb");
+    fprintf(resultfd, "pid,sum\n");
+    char *p_1;
+    char *p_2;
+    char *loc = content;
+    int filelen = FILESIZE;
+    int offset_1;
+    int offset_2;
+    char plist[3][50];
+    char count = 0;
+    int i;
+    int plist_exist = 0;
+    char dot = '.';
+    char ret = '\n';
+
+    while (p_1 = memmem(loc, filelen, "act=order", 9)) {
+        offset_1 = p_1 - loc;
+        loc += offset_1;
+        filelen -= offset_1;
+        p_2 = memmem(loc, filelen, "plist", 5);
+        offset_2 = p_2 - loc;
+        loc += offset_2;
+        filelen -= offset_2;
+        loc += 6;
+        i = 0;
         count = 0;
-        line_ptr = line;
-        while ((tok[count] = strtok_r(line_ptr, ";", &tok_ptr)) != NULL) {
-          count++;
-          line_ptr = NULL;
+        plist_exist = 0;
+        for (;;loc++) {
+            if (*loc == ',') {
+                plist[count][i] = '\0';
+                count++;
+                i=0;
+                if (count == 3) {
+                    fprintf(resultfd, "%s,%d\n", plist[0], atoi(plist[1])*atoi(plist[2]));
+                    count = 0;
+                }
+            } else if (*loc == ';') {
+                if (!plist_exist) {break;}
+                plist[count][i] = '\0';
+                fprintf(resultfd, "%s,%d\n", plist[0], atoi(plist[1])*atoi(plist[2]));
+                break;
+            } else {
+                plist[count][i++] = *loc;
+                plist_exist = 1;
+            }
         }
-        count = 0;
-        while ((pid_tok[count] = strtok_r(tok[3], "=", &pid_tok_ptr)) != NULL) {
-          count++;
-          tok[3] = NULL;
-        }
-        if (count <= 1) {
-          continue;
-        }
-        count = 0;
-        while ((pid_list_tok[count] = strtok_r(pid_tok[1], ",", &pid_list_tok_ptr)) != NULL) {
-          count++;
-          pid_tok[1] = NULL;
-        }
-        for (j=0 ; j<count ; j+=3) {
-          fprintf(resultfd, "%s,%d\n", pid_list_tok[j], atoi(pid_list_tok[j+1])*atoi(pid_list_tok[j+2]));
-        }
-      }
-    } else {
-      pivot++;
     }
-  }
   fclose(resultfd);
   return 0;
 }
