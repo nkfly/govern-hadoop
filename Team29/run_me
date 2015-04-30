@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#time tar -xf EHC_1st.tar.gz
+#./pigz-2.3.3/pigz -dc ./EHC_1st.tar.gz | tar xf -  
+#./testarchive EHC_1st.tar.gz fuck > EHC_1st_round.log  &&  ./preprocess.out &&  R CMD BATCH --no-save --no-restore cal_sales.r  && hadoop fs -mkdir hdfs://master/tmp/Team29 && hadoop fs -copyFromLocal EHC_1st_round.log hdfs://master/tmp/Team29/EHC_1st_round.log
+#./allen EHC_1st.tar.gz EHC_1st_round.log && R CMD BATCH --no-save --no-restore cal_sales.r
+filepath=$(pwd)
+#export PKG_CONFIG_PATH=$filepath/libarchive/lib/pkgconfig/
+export LD_LIBRARY_PATH=$filepath/libarchive/lib/
+#gcc -DENABLE_STAGE_2 main.c -o main `pkg-config --cflags --libs libarchive`
+hadoop fs -mkdir hdfs://master/tmp/Team29
+./main /data/EHC_1st.tar.gz EHC_1st_round.log
