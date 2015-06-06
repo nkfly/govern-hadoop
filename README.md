@@ -1,3 +1,3 @@
 # govern-hadoop
 # final
-preprocess > cutdata > strutured_learning_preprocessing
+preprocess > cutdata > top20 > strutured_learning_preprocessing
