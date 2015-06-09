@@ -8,7 +8,7 @@ import itertools
 
 def mygrouper(n, iterable):
 	args = [iter(iterable)] * n
-	return ([e for e in t if e != None] for t in itertools.zip_longest(*args))
+	return ([e for e in t if e != None] for t in itertools.izip_longest(*args))
 
 def main():
 	gc.collect()
@@ -38,7 +38,7 @@ def main():
 	# clf = DecisionTreeClassifier(max_depth=10, min_samples_split=1,random_state=0)
 	# scores = cross_val_score(clf, X, y)
 	# print scores.mean()    
-	print (0)                         
+	print 0                         
 
 
 	clf = RandomForestClassifier(class_weight=classWeight,n_estimators=100, max_depth=10, min_samples_split=1, random_state=0)
@@ -46,7 +46,7 @@ def main():
 	X = []
 	y = []
 	gc.collect()
-	print (1)
+	print 1
 
 	testX = []
 	with open('vector_final_test', 'r') as f:
@@ -56,14 +56,14 @@ def main():
 
 	
 	pid2price = {}
-	print (2)
+	print 2
 	with open('pid2price', 'r') as f:
 		for line in f:
 			entries = line.strip().split()
 			pid2price[entries[0]] = int(entries[1])
 
 
-	print (3)
+	print 3
 	# for test_x in testX:
 	# 	predictions = clf.predict(testX)
 
@@ -84,7 +84,7 @@ def main():
 
 				if pid in pid2price:
 					pid2sales[pid] += prediction*pid2price[pid]
-	print (5)
+	print 5
 	index = 0
 	print_pre = 25
 	for w in sorted(pid2sales, key=pid2sales.get, reverse=True):
