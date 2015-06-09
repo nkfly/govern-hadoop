@@ -55,20 +55,59 @@ def check_browser_agent(agent):
 		return 6
 
 
-
-if __name__ == '__main__':
-	erUid2priorityQueue = {}
-	pid2id = {}
-	with open('./view_test.csv', 'r') as f:
+def get_pid2sales(topN):
+	pid2sales = {}
+	with open('order.csv', 'r') as f:
 		f.readline()
 		for line in f:
 			entries = line.strip().split(',')
+			plist = entries[8]
+			plistEntries = plist.split('-')
+
+			for i in range(len(plistEntries)/3):
+				if plistEntries[3*i] not in pid2sales:
+					pid2sales[plistEntries[3*i]] = 0
+
+				pid2sales[plistEntries[3*i]] += int(plistEntries[3*i+1])*int(plistEntries[3*i+2])
+
+	returnPid2id = {}
+	for w in sorted(pid2sales, key=pid2sales.get, reverse=True):
+		if len(returnPid2id) >= topN:
+			break
+		# print w, pid2sales[w]
+		returnPid2id[w] = len(returnPid2id)
+
+	return returnPid2id
+
+
+
+if __name__ == '__main__':
+	erUid2priorityQueue = {}
+	isTrain = False
+
+	viewFile = 'view.csv' if isTrain else 'view_test.csv'
+	searchFile = 'search.csv' if isTrain else 'search_test.csv'
+	orderFile = 'order.csv' if isTrain else 'order_test.csv'
+	vectorFinal = 'vector_final' if isTrain else 'vector_final_test'
+
+	topN = 1000
+
+	trainPid2id = get_pid2sales(topN)
+	# print len(trainPid2sales)
+
+	with open(viewFile, 'r') as f:
+		f.readline()
+		for line in f:
+			entries = line.strip().split(',')
+			pid = entries[8]
+
+			if pid not in trainPid2id:
+				continue
+
+
 			day, hour, minute, second = get_day_hour_minute_second(entries)
 			priority = time_to_priority(day,hour,minute,second)
 
-			pid = entries[8]
-			if pid not in pid2id:
-				pid2id[pid] = len(pid2id)
 
 			erUid = entries[10]
 
@@ -80,8 +119,8 @@ if __name__ == '__main__':
 
 			erUid2priorityQueue[erUid][pid].push(Item(pid, entries), priority) 
 
-
-	with open('./search_test.csv', 'r') as f:
+	# print len(pid2id)
+	with open(searchFile, 'r') as f:
 		f.readline()
 		for line in f:
 			entries = line.strip().split(',')
@@ -94,7 +133,7 @@ if __name__ == '__main__':
 					erUid2priorityQueue[erUid][pid].push(Item('SEARCH', entries), priority)
 
 
-	with open('./order_test.csv', 'r') as f:
+	with open(orderFile, 'r') as f:
 		f.readline();
 		for line in f:
 			entries = line.strip().split(',')
@@ -111,8 +150,9 @@ if __name__ == '__main__':
 					pid = plistEntries[3*i]
 					if pid in erUid2priorityQueue[erUid]:
 						erUid2priorityQueue[erUid][pid].push(Item('BUY-' + plistEntries[3*i+1], entries), priority)
+
 	with open('test_map', 'w') as m:
-		with open('vector_final_test', 'w') as w:
+		with open(vectorFinal, 'w') as w:
 			for erUid in erUid2priorityQueue:
 				for pid in erUid2priorityQueue[erUid]:
 					priorityQueue = erUid2priorityQueue[erUid][pid]
@@ -141,14 +181,14 @@ if __name__ == '__main__':
 
 					w.write(str(buyCount) + ' ') # class
 
-					idDimesion = pid2id[pid]
+					idDimesion = trainPid2id[pid]
 					index = 1
-					# while index <= len(pid2id):
-					# 	if index == idDimesion:
-					# 		w.write(str(index) + ':1 ' )
-					# 	else:
-					# 		w.write(str(index) + ':0 ' )
-					# 	index += 1
+					while index <= len(trainPid2id):
+						if index == idDimesion:
+							w.write(str(index) + ':1 ' )
+						else:
+							w.write(str(index) + ':0 ' )
+						index += 1
 
 
 					w.write(str(index) + ':' + str(viewTime) + ' ')
@@ -177,7 +217,9 @@ if __name__ == '__main__':
 							w.write(str(index) + ':0 ' )
 						index += 1
 					w.write('\n')
-					m.write(pid + '\n')
+
+					if not isTrain:
+						m.write(pid + '\n')
 
 				
 

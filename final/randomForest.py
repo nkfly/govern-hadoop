@@ -16,7 +16,7 @@ def main():
 	y = []
 	count = 0
 	notZero = 0
-	classWeight = {1 : 49, 2 : 49, 3 : 49, 4 : 49}
+	
 	with open('vector_final', 'r') as f:
 		for line in f:
 			entries = line.strip().split()
@@ -30,6 +30,10 @@ def main():
 
 	print float(notZero)/count
 
+	classWeight = {}
+	for i in range(1, 15):
+		classWeight[i] = int(float(notZero)/count)
+
 
 
 
@@ -41,7 +45,7 @@ def main():
 	print 0                         
 
 
-	clf = RandomForestClassifier(class_weight=classWeight,n_estimators=100, max_depth=10, min_samples_split=1, random_state=0)
+	clf = RandomForestClassifier(class_weight=classWeight,n_estimators=500, min_samples_split=1, random_state=0)
 	clf.fit(X, y)
 	X = []
 	y = []
@@ -86,9 +90,9 @@ def main():
 					pid2sales[pid] += prediction*pid2price[pid]
 	print 5
 	index = 0
-	print_pre = 25
+	print_pre = 20
 	for w in sorted(pid2sales, key=pid2sales.get, reverse=True):
-		print w
+		print w, pid2sales[w]
 		index += 1
 		if index >= print_pre:
 			break
