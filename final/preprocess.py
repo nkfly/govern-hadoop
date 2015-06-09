@@ -86,8 +86,8 @@ def get_act(line):
 
 
 if __name__ == '__main__':
-	test_file = './EHC/EHC_2nd_round_test.log'
-	train_file = './EHC/EHC_2nd_round_train.log'
+	test_file = './EHC/test.log'
+	train_file = './EHC/train.log'
 
 	if not os.path.exists(test_file) or not os.path.exists(train_file):
 		print 'please put the EHC folder in the same layer'
@@ -102,13 +102,13 @@ if __name__ == '__main__':
 
 	"""
 
-	v = open('view.csv', 'w')
+	v = open('view_test.csv', 'w')
 	v.write('ip,year,month,day,hour,minute,second,uid,pid,cat,erUid,agent\n')
-	s = open('search.csv', 'w')
+	s = open('search_test.csv', 'w')
 	s.write('ip,year,month,day,hour,minute,second,uid,keywords,name,erUid,agent\n')
-	o = open('order.csv', 'w')
+	o = open('order_test.csv', 'w')
 	o.write('ip,year,month,day,hour,minute,second,uid,plist,erUid,agent\n')
-	c = open('cart.csv', 'w')
+	c = open('cart_test.csv', 'w')
 	c.write('ip,year,month,day,hour,minute,second,uid,plist,erUid,agent\n')
 
 	statistics = {}
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 	statistics['cart'] = 0
 	sum = 0.0
 
-	with open(train_file, 'r') as f:
+	with open(test_file, 'r') as f:
 		for line in f:
 			entries = line.strip().split()
 

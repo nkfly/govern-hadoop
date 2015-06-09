@@ -59,7 +59,7 @@ def check_browser_agent(agent):
 if __name__ == '__main__':
 	erUid2priorityQueue = {}
 	pid2id = {}
-	with open('./view.csv', 'r') as f:
+	with open('./view_test.csv', 'r') as f:
 		f.readline()
 		for line in f:
 			entries = line.strip().split(',')
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 			erUid2priorityQueue[erUid][pid].push(Item(pid, entries), priority) 
 
 
-	with open('./search.csv', 'r') as f:
+	with open('./search_test.csv', 'r') as f:
 		f.readline()
 		for line in f:
 			entries = line.strip().split(',')
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 					erUid2priorityQueue[erUid][pid].push(Item('SEARCH', entries), priority)
 
 
-	with open('./order.csv', 'r') as f:
+	with open('./order_test.csv', 'r') as f:
 		f.readline();
 		for line in f:
 			entries = line.strip().split(',')
@@ -111,72 +111,73 @@ if __name__ == '__main__':
 					pid = plistEntries[3*i]
 					if pid in erUid2priorityQueue[erUid]:
 						erUid2priorityQueue[erUid][pid].push(Item('BUY-' + plistEntries[3*i+1], entries), priority)
+	with open('test_map', 'w') as m:
+		with open('vector_final_test', 'w') as w:
+			for erUid in erUid2priorityQueue:
+				for pid in erUid2priorityQueue[erUid]:
+					priorityQueue = erUid2priorityQueue[erUid][pid]
+					# w.write(erUid + ' ' + pid + ' ')
 
-	with open('vector_final', 'w') as w:
-		for erUid in erUid2priorityQueue:
-			for pid in erUid2priorityQueue[erUid]:
-				priorityQueue = erUid2priorityQueue[erUid][pid]
-				# w.write(erUid + ' ' + pid + ' ')
+					
+					viewTime = 0
+					searchTime = 0
+					dayOfWeek = -1
+					buyCount = 0
+					timePeriod = -1
+					agent = -1
 
-				
-				viewTime = 0
-				searchTime = 0
-				dayOfWeek = -1
-				buyCount = 0
-				timePeriod = -1
-				agent = -1
-
-				while priorityQueue.hasItem():
-					item = priorityQueue.pop()
-					if 'SEARCH' in item.token:
-						searchTime += 1
-					elif 'BUY' in item.token:
-						buyCount += int(item.token.split('-')[1])
-					else:
-						viewTime += 1
-						dayOfWeek = int(item.entries[3])%7
-						day, hour, minute, second = get_day_hour_minute_second(item.entries)
-						timePeriod = get_time_period(hour, minute, second)
-
-
-				w.write(str(buyCount) + ' ') # class
-
-				idDimesion = pid2id[pid]
-				index = 1
-				# while index <= len(pid2id):
-				# 	if index == idDimesion:
-				# 		w.write(str(index) + ':1 ' )
-				# 	else:
-				# 		w.write(str(index) + ':0 ' )
-				# 	index += 1
+					while priorityQueue.hasItem():
+						item = priorityQueue.pop()
+						if 'SEARCH' in item.token:
+							searchTime += 1
+						elif 'BUY' in item.token:
+							buyCount += int(item.token.split('-')[1])
+						else:
+							viewTime += 1
+							dayOfWeek = int(item.entries[3])%7
+							day, hour, minute, second = get_day_hour_minute_second(item.entries)
+							timePeriod = get_time_period(hour, minute, second)
 
 
-				w.write(str(index) + ':' + str(viewTime) + ' ')
-				index += 1
-				w.write(str(index) + ':' + str(searchTime) + ' ')
-				index += 1
+					w.write(str(buyCount) + ' ') # class
 
-				for i in range(7):
-					if dayOfWeek == i:
-						w.write(str(index) + ':1 ' )
-					else:
-						w.write(str(index) + ':0 ' )
+					idDimesion = pid2id[pid]
+					index = 1
+					# while index <= len(pid2id):
+					# 	if index == idDimesion:
+					# 		w.write(str(index) + ':1 ' )
+					# 	else:
+					# 		w.write(str(index) + ':0 ' )
+					# 	index += 1
+
+
+					w.write(str(index) + ':' + str(viewTime) + ' ')
+					index += 1
+					w.write(str(index) + ':' + str(searchTime) + ' ')
 					index += 1
 
-				for i in range(get_time_period_number()):
-					if timePeriod == i:
-						w.write(str(index) + ':1 ' )
-					else:
-						w.write(str(index) + ':0 ' )
-					index += 1
+					for i in range(7):
+						if dayOfWeek == i:
+							w.write(str(index) + ':1 ' )
+						else:
+							w.write(str(index) + ':0 ' )
+						index += 1
 
-				for i in range(get_browser_agent_number()):
-					if agent == i:
-						w.write(str(index) + ':1 ' )
-					else:
-						w.write(str(index) + ':0 ' )
-					index += 1
-				w.write('\n')
+					for i in range(get_time_period_number()):
+						if timePeriod == i:
+							w.write(str(index) + ':1 ' )
+						else:
+							w.write(str(index) + ':0 ' )
+						index += 1
+
+					for i in range(get_browser_agent_number()):
+						if agent == i:
+							w.write(str(index) + ':1 ' )
+						else:
+							w.write(str(index) + ':0 ' )
+						index += 1
+					w.write('\n')
+					m.write(pid + '\n')
 
 				
 
