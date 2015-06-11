@@ -75,6 +75,7 @@ def get_pid2sales(topN):
 		if len(returnPid2id) >= topN:
 			break
 		# print w, pid2sales[w]
+		print w
 		returnPid2id[w] = len(returnPid2id)
 
 	return returnPid2id
@@ -90,7 +91,7 @@ if __name__ == '__main__':
 	orderFile = 'order.csv' if isTrain else 'order_test.csv'
 	vectorFinal = 'vector_final' if isTrain else 'vector_final_test'
 
-	topN = 1000
+	topN = 100
 
 	trainPid2id = get_pid2sales(topN)
 	# print len(trainPid2sales)
@@ -189,6 +190,10 @@ if __name__ == '__main__':
 						else:
 							w.write(str(index) + ':0 ' )
 						index += 1
+
+					# order as a dimension
+					w.write(str(index) + ':' + str(topN - idDimesion) + ' ')
+					index += 1
 
 
 					w.write(str(index) + ':' + str(viewTime) + ' ')

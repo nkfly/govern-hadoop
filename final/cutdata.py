@@ -1,8 +1,8 @@
 import os.path
 import csv
 if __name__ == '__main__':
-	test_file = './EHC/EHC_2nd_round_test.log'
-	train_file = './EHC/EHC_2nd_round_train.log'
+	test_file = './EHC/test.log'
+	train_file = './EHC/train.log'
 
 	if not os.path.exists(test_file) or not os.path.exists(train_file):
 		print 'please put the EHC folder in the same layer'

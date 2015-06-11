@@ -3,6 +3,7 @@ from sklearn.datasets import make_blobs
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 import gc
 import itertools
 
@@ -45,7 +46,8 @@ def main():
 	print 0                         
 
 
-	clf = RandomForestClassifier(class_weight=classWeight,n_estimators=500, min_samples_split=1, random_state=0)
+	# clf = RandomForestClassifier(class_weight=classWeight,n_estimators=500, min_samples_split=1, random_state=0)
+	clf = SVC()
 	clf.fit(X, y)
 	X = []
 	y = []
