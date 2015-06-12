@@ -170,6 +170,42 @@ def get_features(viewFile, searchFile, orderFile):
 	return pid2viewSum, pid2uniqueViewer, pid2searchSum, pid2uniqueSearch, pid2sales
 
 
+def get_pid2price(orderFile):
+	pid2price = {}
+	with open(orderFile, 'r') as f:
+		f.readline()
+		for line in f:
+			entries = line.strip().split(',')
+			plist = entries[8]
+			plistEntries = plist.split('-')
+
+			for i in range(len(plistEntries)/3):
+				if plistEntries[3*i] not in pid2price:
+					pid2price[plistEntries[3*i]] = int(plistEntries[3*i+2])
+
+
+
+	return pid2price
+
+
+def get_pid2cat():
+	pid2cat = {}
+	layer = [{}, {}, {}, {}, {}, {}]
+	with open('./view.csv', 'r') as f:
+		f.readline()
+		for line in f:
+			entries = line.strip().split(',')
+			pid = entries[8]
+			cat = entries[9]
+
+			if pid not in pid2cat:
+				pid2cat[pid] = (cat.split('-')[-1]).split('_')
+
+			for i in range(len(pid2cat[pid])):
+				if pid2cat[pid][i] not in layer[i]:
+					layer[i][pid2cat[pid][i]] = len(layer[i])
+
+	return pid2cat, layer
 
 
 if __name__ == '__main__':
@@ -181,31 +217,48 @@ if __name__ == '__main__':
 	y = []
 	X = []
 
-	with open('statistics.train', 'w') as w:
-		for pid in pid2viewSum:
-			viewSum = 0 if pid not in pid2viewSum else pid2viewSum[pid]
-			uniqueViewer = 0 if pid not in pid2uniqueViewer else len(pid2uniqueViewer[pid])
-			searchSum = 0 if pid not in pid2searchSum else pid2searchSum[pid]
-			uniqueSearch = 0 if pid not in pid2uniqueSearch else len(pid2uniqueSearch[pid])
-			sales = 0 if pid not in trainPid2sales else trainPid2sales[pid]
+	pid2cat, layer = get_pid2cat()
+	layerInclude = 2
 
-			test_viewSum = 0 if pid not in test_pid2viewSum else test_pid2viewSum[pid]
-			test_uniqueViewer = 0 if pid not in test_pid2uniqueViewer else len(test_pid2uniqueViewer[pid])
-			test_searchSum = 0 if pid not in test_pid2searchSum else test_pid2searchSum[pid]
-			test_uniqueSearch = 0 if pid not in test_pid2uniqueSearch else len(test_pid2uniqueSearch[pid])
-			test_sales = 0 if pid not in test_pid2sales else test_pid2sales[pid]
+	pid2price = get_pid2price('./order.csv')
 
-			if test_sales - sales >= 0:
-				y.append(1)
-			else:
-				y.append(-1)
 
-			X.append([test_viewSum-viewSum, test_uniqueViewer-uniqueViewer, test_searchSum-searchSum, test_uniqueSearch-uniqueSearch])
+	for pid in pid2viewSum:
+		viewSum = 0 if pid not in pid2viewSum else pid2viewSum[pid]
+		uniqueViewer = 0 if pid not in pid2uniqueViewer else len(pid2uniqueViewer[pid])
+		searchSum = 0 if pid not in pid2searchSum else pid2searchSum[pid]
+		uniqueSearch = 0 if pid not in pid2uniqueSearch else len(pid2uniqueSearch[pid])
+		sales = 0 if pid not in trainPid2sales else trainPid2sales[pid]
+
+		test_viewSum = 0 if pid not in test_pid2viewSum else test_pid2viewSum[pid]
+		test_uniqueViewer = 0 if pid not in test_pid2uniqueViewer else len(test_pid2uniqueViewer[pid])
+		test_searchSum = 0 if pid not in test_pid2searchSum else test_pid2searchSum[pid]
+		test_uniqueSearch = 0 if pid not in test_pid2uniqueSearch else len(test_pid2uniqueSearch[pid])
+		test_sales = 0 if pid not in test_pid2sales else test_pid2sales[pid]
+
+		price = 0 if pid not in pid2price else pid2price[pid]
+
+		if test_sales - sales >= 0:
+			y.append(1)
+		else:
+			y.append(-1)
+
+		x = [test_viewSum-viewSum, test_uniqueViewer-uniqueViewer, test_searchSum-searchSum, test_uniqueSearch-uniqueSearch, price]
+
+		for i in range(layerInclude):
+			for j in range( len(layer[i]) ):
+				if j == layer[i][pid2cat[pid][i]]:
+					x.append(1)
+				else:
+					x.append(0)
+
+		X.append(x)
 
 
 			# w.write('0 ' + str(viewSum) + ' ' + str(uniqueViewer) + ' ' + str(searchSum) + ' ' + str(uniqueSearch) + ' ' + str(sales) + '\n')
 
-	clf = SVR()
+	# clf = SVR()
+	clf = RandomForestClassifier(n_estimators=100, min_samples_split=1, random_state=0)
 	clf.fit(X, y)
 
 	pid2viewSum, pid2uniqueViewer, pid2searchSum, pid2uniqueSearch, trainPid2sales = get_features('./view.csv', './search.csv', './order.csv')
@@ -227,12 +280,19 @@ if __name__ == '__main__':
 		test_uniqueSearch = 0 if pid not in test_pid2uniqueSearch else len(test_pid2uniqueSearch[pid])
 		test_sales = 0 if pid not in test_pid2sales else test_pid2sales[pid]
 
-		if test_sales - sales >= 0:
-			y.append(1)
-		else:
-			y.append(-1)
+		price = 0 if pid not in pid2price else pid2price[pid]
 
-		X.append([test_viewSum-viewSum, test_uniqueViewer-uniqueViewer, test_searchSum-searchSum, test_uniqueSearch-uniqueSearch])
+		x = [test_viewSum-viewSum, test_uniqueViewer-uniqueViewer, test_searchSum-searchSum, test_uniqueSearch-uniqueSearch, price]
+
+		for i in range(layerInclude):
+			for j in range( len(layer[i]) ):
+				if j == layer[i][pid2cat[pid][i]]:
+					x.append(1)
+				else:
+					x.append(0)
+
+
+		X.append(x)
 
 	predictions = clf.predict(X)
 
